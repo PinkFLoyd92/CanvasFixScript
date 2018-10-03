@@ -4,6 +4,8 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
+import javax.rmi.CORBA.StubDelegate;
+
 import interfaces.LinksFixer.Fixer;
 
 public class main {
@@ -29,13 +31,17 @@ public class main {
 		Fixer fixer = new Fixer(conn);
 		Attachments attachments = new Attachments(conn);
 		try {
-			attachments.copiarFolderAttachments(14323, 20190);
-		} catch (SQLException e1) {
+			//attachments.copiarFolderAttachments(14323, 20190);
+			StudentUpdater updater = new StudentUpdater(conn);
+			
+			updater.updateStudents();
+
+		} catch (Exception e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		fixer.fixEnrollmentNamesOfTerm(67);
-		fixer.fixFilesInWikiPages(67);
+		//fixer.fixEnrollmentNamesOfTerm(67);
+		//fixer.fixFilesInWikiPages(67);
 		//fixer.fixQuestionsFromTerm(67);
 
 		//fixer.fixEnrollmentNamesOfTerm(68);
