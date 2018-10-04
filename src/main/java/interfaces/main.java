@@ -29,21 +29,21 @@ public class main {
 		System.out.println("Starting...");
 
 		Fixer fixer = new Fixer(conn);
-		Attachments attachments = new Attachments(conn);
+		//Attachments attachments = new Attachments(conn);
 		try {
 			//attachments.copiarFolderAttachments(14323, 20190);
-			StudentUpdater updater = new StudentUpdater(conn);
+			//StudentUpdater updater = new StudentUpdater(conn);
 			
-			updater.updateStudents();
+			//updater.updateStudents();
 
 		} catch (Exception e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		//fixer.fixEnrollmentNamesOfTerm(67);
+
 		//fixer.fixFilesInWikiPages(67);
 		//fixer.fixQuestionsFromTerm(67);
-
+		fixer.fixContentTagFilesFromTerm(67);
 		//fixer.fixEnrollmentNamesOfTerm(68);
 		//fixer.fixQuestionsFromTerm(68);
 

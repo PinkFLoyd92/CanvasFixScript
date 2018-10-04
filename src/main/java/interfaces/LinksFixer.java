@@ -28,8 +28,9 @@ public interface LinksFixer {
 
 		/*
 		 * return true if fixed, else false
+		 * Reparacion de questions dentro del termino
 		 * */
-		public boolean fixQuestionsFromTerm(long prev_enrollment_term) {
+		public boolean fixQuestionsFromTerm(long enrollment_term) {
 
         try {
         	ResultSet queryResult;
@@ -37,7 +38,7 @@ public interface LinksFixer {
             Statement stmtUpdater = conn.createStatement();
 
             queryResult = stmtQuery.executeQuery("SELECT q.context_id as course_id,qq.* from quiz_questions qq join quizzes q on qq.quiz_id=q.id "
-                                     + "WHERE quiz_id in (SELECT id from quizzes WHERE context_id in (SELECT id from courses WHERE enrollment_term_id="+prev_enrollment_term+")) "
+                                     + "WHERE quiz_id in (SELECT id from quizzes WHERE context_id in (SELECT id from courses WHERE enrollment_term_id="+enrollment_term+")) "
                                      + "AND question_data like '%/courses/%' and assessment_question_id is not null ORDER BY id");
             while(queryResult.next()) {
                 String question_data = queryResult.getString("question_data");
@@ -273,13 +274,9 @@ public interface LinksFixer {
 		
 	}
 
-	public void fixEnrollmentNamesOfTerm(int term) {
-		String sqlMigUsuarios = "select * from mig_usuarios where ";
-	}
-	
 	public void fixFilesInWikiPages(int term) {
 		String sqlCourses = "Select id from courses where enrollment_term_id="+term
-				+" and id=20190"
+				//+" and id=20190"
 				;
 
 		ResultSet getCourses;
@@ -332,6 +329,64 @@ public interface LinksFixer {
 	}
 	
 	public void fixContentTagFilesFromTerm(int term) {
+		String sqlCourses = "Select id from courses where enrollment_term_id="+term
+				+" and id=19883"
+				;
+
+		ResultSet getCourses;
+		Statement stmtGetCourses;
+		try {
+			stmtGetCourses = conn.createStatement();
+
+        getCourses = stmtGetCourses.executeQuery(sqlCourses);
+            while(getCourses.next()) { // en cada curso
+            	long course_id = getCourses.getLong("id");
+            	String sqlContentTags = "select id,title from content_tags where context_id="+course_id+"  "
+            			+ "and context_type='Course' and content_type='Attachment'";
+            	
+            	ResultSet getContentTags;
+            	Statement stmtContentTags;
+            	
+            	stmtContentTags = conn.createStatement();
+            	getContentTags = stmtContentTags.executeQuery(sqlContentTags);
+            	
+            	while(getContentTags.next()) {
+            		try {
+            		String title = getContentTags.getString("title");
+            		long idContentTag = getContentTags.getLong("id");
+            		String sqlGetAttachments = "select id from attachments where display_name=? and context_type='Course' and context_id="+course_id;
+            		ResultSet getAttachment;
+            		PreparedStatement stmtGetAttachment;
+            		
+            		stmtGetAttachment = conn.prepareStatement(sqlGetAttachments);
+            		stmtGetAttachment.setString(1, title);
+            		
+            		getAttachment = stmtGetAttachment.executeQuery();
+            		
+            		if(getAttachment.next()) {
+            			long attachId = getAttachment.getLong("id");
+            			System.out.println("Updating content_tag id " + idContentTag + "/  Attachment ID =  " + attachId);
+            			String sqlUpdate = "update content_tags set content_id=? where id=?";
+            			PreparedStatement psfUpdateContentTag;
+            			
+            			psfUpdateContentTag = conn.prepareStatement(sqlUpdate);
+            			psfUpdateContentTag.setLong(1, attachId);
+            			psfUpdateContentTag.setLong(2, idContentTag);
+            			psfUpdateContentTag.executeUpdate();
+
+            			
+            		} else System.err.println("No se encontro el para el content tag: " + idContentTag);
+
+            		} catch(Exception e) {
+            			e.printStackTrace();
+            		}
+            	}
+
+            	
+            }
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
 		
 	}
 	
